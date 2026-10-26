@@ -1,4 +1,4 @@
-
+```python
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
@@ -211,7 +211,14 @@ def show_exam_result(request, course_id, submission_id):
         correct_choices = choices.filter(is_correct=True)
         selected_choices = choices.filter(id__in=selected_ids)
 
-        is_correct = question.is_get_score(selected_ids)
+        selected_question_ids = set(
+            selected_choices.values_list('id', flat=True)
+        )
+
+        is_correct = (
+            correct_choices.exists()
+            and question.is_get_score(selected_question_ids)
+        )
 
         possible_score += question.grade
 
@@ -247,3 +254,4 @@ def show_exam_result(request, course_id, submission_id):
         'onlinecourse/exam_result_bootstrap.html',
         context
     )
+```
