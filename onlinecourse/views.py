@@ -1,11 +1,9 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.views import generic
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.views import generic
 from django.views.decorators.http import require_POST
 import logging
 
@@ -205,30 +203,20 @@ def show_exam_result(request, course_id, submission_id):
     questions = Question.objects.filter(course=course)
 
     question_results = []
-    total_questions = questions.count()
-    correct_count = 0
+    total_score = 0
+    possible_score = 0
 
     for question in questions:
         choices = Choice.objects.filter(question=question)
-
         correct_choices = choices.filter(is_correct=True)
         selected_choices = choices.filter(id__in=selected_ids)
 
-        correct_ids = set(
-            correct_choices.values_list('id', flat=True)
-        )
+        is_correct = question.is_get_score(selected_ids)
 
-        selected_question_ids = set(
-            selected_choices.values_list('id', flat=True)
-        )
-
-        is_correct = (
-            bool(correct_ids)
-            and selected_question_ids == correct_ids
-        )
+        possible_score += question.grade
 
         if is_correct:
-            correct_count += 1
+            total_score += question.grade
 
         question_results.append({
             'question': question,
@@ -239,8 +227,8 @@ def show_exam_result(request, course_id, submission_id):
         })
 
     score = (
-        round((correct_count / total_questions) * 100, 2)
-        if total_questions > 0
+        round((total_score / possible_score) * 100, 2)
+        if possible_score > 0
         else 0
     )
 
@@ -248,8 +236,8 @@ def show_exam_result(request, course_id, submission_id):
         'course': course,
         'submission': submission,
         'question_results': question_results,
-        'total_questions': total_questions,
-        'correct_count': correct_count,
+        'total_score': total_score,
+        'possible_score': possible_score,
         'score': score,
         'passed': score >= 50,
     }

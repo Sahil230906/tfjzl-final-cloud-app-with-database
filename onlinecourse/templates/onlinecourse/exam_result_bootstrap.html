@@ -75,7 +75,7 @@
                 <h1 class="display-4">{{ score }}%</h1>
 
                 <p class="mb-1">
-                    Correct answers: {{ correct_count }} / {{ total_questions }}
+                    Points earned: {{ total_score }} / {{ possible_score }}
                 </p>
 
                 {% if passed %}
@@ -102,12 +102,7 @@
         {% for result in question_results %}
             <div class="card mb-3">
 
-                <div class="card-header
-                    {% if result.is_correct %}
-                        bg-success text-white
-                    {% else %}
-                        bg-light
-                    {% endif %}">
+                <div class="card-header {% if result.is_correct %}bg-success text-white{% else %}bg-light{% endif %}">
 
                     <strong>
                         Question {{ forloop.counter }}:
@@ -138,7 +133,11 @@
                         <p class="text-muted">No answer selected.</p>
                     {% endif %}
 
-                    <p><strong>Correct answer{% if result.correct_choices|length != 1 %}s{% endif %}:</strong></p>
+                    <p>
+                        <strong>
+                            Correct answer{% if result.correct_choices|length != 1 %}s{% endif %}:
+                        </strong>
+                    </p>
 
                     {% if result.correct_choices %}
                         <ul>
